@@ -1,0 +1,43 @@
+/* Programm um Servos mit einem Poti ansteuern zu können. Dabei wird der Sollwinkel des Regelpotis sowie der Istwinkel des Servointernen Potis via Serialplot ausgegeben. 
+David Schwenter, Rapperswil 12.09.2018*/
+
+#include <Arduino.h>
+#include <Servo.h>
+
+Servo myservo;
+
+    
+int Poti;               // Analoger Wert Regelpoti
+int servoPos;           // Analoger Wert Servointernes Poti
+int sollWinkel;         // in Grad umgerechneter Analoger Wert des Regelpotis
+int istWinkel;          // In Grad umgerechneter Analoger Wert des Servointernen Potis
+int winkel = 0;
+int oldValue = 0;       // Variable, um flimmern auf Serialmonitor zu verhindern
+int newValue = 0;
+
+
+void setup() {
+  Serial.begin(9600);
+    myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+}
+
+
+void loop() {
+  Poti = analogRead(A0);              // Analoger Wert Regelpoti einlesen
+  oldValue = Poti;                    
+  servoPos = analogRead(A1);          // Servointernes Poti einlesen
+
+  sollWinkel = map(Poti, 0, 1023, 0,200);    // in Grad umgerechneter Analoger Wert des Regelpotis
+  istWinkel = map(servoPos, 0, 1023, 0,200); // In Grad umgerechneter Analoger Wert des Servointernen Potis
+  myservo.write(sollWinkel);          // Ausgabe des SOllwinkels auf den Servo
+  delay(10);  // Verzögerung
+
+  if(newValue!=oldValue)    // Bei Winkeländeurung die entsprechenden Winkel plotten
+  {
+  Serial.print("Sollwinkel=");  
+  Serial.println(sollWinkel);
+  Serial.print("Istwinkel =");
+  Serial.println(istWinkel);
+  newValue = oldValue;
+  };
+}
